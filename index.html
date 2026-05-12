@@ -6,453 +6,106 @@
   <title>AI Brain — Free AI Assistant</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0a0a0f;
-      --surface: #111118;
-      --surface2: #1a1a24;
-      --surface3: #22222f;
-      --accent: #7c5cfc;
-      --accent2: #a78bfa;
-      --text: #e8e8f0;
-      --text2: #9090a8;
-      --text3: #5a5a72;
-      --border: rgba(124,92,252,0.18);
-      --border2: rgba(255,255,255,0.07);
-      --glow: rgba(124,92,252,0.35);
-      --green: #43e97b;
-      --cyan: #38f9d7;
-      --red: #fc5c7d;
+      --bg: #0a0a0f; --surface: #111118; --surface2: #1a1a24; --surface3: #22222f;
+      --accent: #7c5cfc; --accent2: #a78bfa; --text: #e8e8f0; --text2: #9090a8; --text3: #5a5a72;
+      --border: rgba(124,92,252,0.18); --border2: rgba(255,255,255,0.07);
+      --glow: rgba(124,92,252,0.35); --green: #43e97b; --cyan: #38f9d7; --red: #fc5c7d;
     }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; }
+    .app { display: flex; flex-direction: column; height: 100vh; max-width: 860px; margin: 0 auto; }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      overflow: hidden;
-    }
-
-    /* ── Layout ── */
-    .app {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      max-width: 860px;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    /* ambient glow top */
-    .app::before {
-      content: '';
-      position: fixed;
-      top: -120px; left: 50%;
-      transform: translateX(-50%);
-      width: 600px; height: 300px;
-      background: radial-gradient(ellipse, rgba(124,92,252,0.10) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ── Header ── */
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--border2);
-      background: var(--surface);
-      position: relative;
-      z-index: 10;
-      flex-shrink: 0;
-    }
-
-    .logo {
-      width: 40px; height: 40px;
-      background: linear-gradient(135deg, #7c5cfc, #c084fc);
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      box-shadow: 0 0 18px var(--glow);
-      flex-shrink: 0;
-    }
-
-    .header-title h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
-    .header-title p  { font-size: 11px; color: var(--text3); margin-top: 2px; }
-
-    .live-badge {
-      margin-left: auto;
-      display: flex; align-items: center; gap: 6px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      background: rgba(67,233,123,0.08);
-      border: 1px solid rgba(67,233,123,0.2);
-      font-size: 11px;
-      color: var(--green);
-    }
-    .live-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-      animation: blink 2s ease-in-out infinite;
-    }
+    .header { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--border2); background: var(--surface); flex-shrink: 0; }
+    .logo { width: 40px; height: 40px; background: linear-gradient(135deg,#7c5cfc,#c084fc); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 0 18px var(--glow); flex-shrink: 0; }
+    .header-title h1 { font-size: 16px; font-weight: 700; }
+    .header-title p { font-size: 11px; color: var(--text3); margin-top: 2px; }
+    .live-badge { margin-left: auto; display: flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; background: rgba(67,233,123,0.08); border: 1px solid rgba(67,233,123,0.2); font-size: 11px; color: var(--green); }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    /* ── API Key Banner ── */
-    #api-banner {
-      background: rgba(252,92,125,0.08);
-      border-bottom: 1px solid rgba(252,92,125,0.2);
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-      flex-wrap: wrap;
-    }
-    #api-banner p { font-size: 12px; color: #fc8da4; flex: 1; min-width: 200px; }
-    #api-banner input {
-      flex: 2;
-      min-width: 220px;
-      padding: 6px 12px;
-      background: var(--surface3);
-      border: 1px solid rgba(252,92,125,0.3);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 12px;
-      font-family: monospace;
-      outline: none;
-    }
-    #api-banner input:focus { border-color: var(--red); }
-    #api-banner button {
-      padding: 6px 16px;
-      background: var(--red);
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-size: 12px;
-      cursor: pointer;
-      font-family: inherit;
-      white-space: nowrap;
-    }
-    #api-banner button:hover { opacity: 0.85; }
+    #api-banner { background: rgba(252,92,125,0.08); border-bottom: 1px solid rgba(252,92,125,0.2); padding: 10px 20px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+    #api-banner p { font-size: 12px; color: #fc8da4; flex: 1; min-width: 180px; }
+    #api-banner input { flex: 2; min-width: 200px; padding: 7px 12px; background: var(--surface3); border: 1px solid rgba(252,92,125,0.3); border-radius: 8px; color: var(--text); font-size: 12px; font-family: monospace; outline: none; }
+    #api-banner button { padding: 7px 16px; background: var(--red); border: none; border-radius: 8px; color: white; font-size: 12px; cursor: pointer; font-family: inherit; }
 
-    /* ── Toolbar ── */
-    .toolbar {
-      display: flex;
-      gap: 6px;
-      padding: 8px 20px;
-      border-bottom: 1px solid var(--border2);
-      background: var(--surface);
-      overflow-x: auto;
-      flex-shrink: 0;
-      scrollbar-width: none;
-    }
+    .toolbar { display: flex; gap: 6px; padding: 8px 20px; border-bottom: 1px solid var(--border2); background: var(--surface); overflow-x: auto; flex-shrink: 0; scrollbar-width: none; }
     .toolbar::-webkit-scrollbar { display: none; }
+    .tool-btn { display: flex; align-items: center; gap: 5px; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); font-size: 12px; cursor: pointer; white-space: nowrap; transition: all 0.15s; font-family: inherit; }
+    .tool-btn:hover, .tool-btn.active { border-color: var(--accent); color: var(--accent2); background: rgba(124,92,252,0.14); }
 
-    .tool-btn {
-      display: flex; align-items: center; gap: 5px;
-      padding: 5px 13px;
-      border-radius: 20px;
-      border: 1px solid var(--border2);
-      background: var(--surface2);
-      color: var(--text2);
-      font-size: 12px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s;
-      font-family: inherit;
-    }
-    .tool-btn:hover  { border-color: var(--accent); color: var(--accent2); background: rgba(124,92,252,0.08); }
-    .tool-btn.active { border-color: var(--accent); color: var(--accent2); background: rgba(124,92,252,0.14); }
-
-    /* ── Messages ── */
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      scroll-behavior: smooth;
-    }
+    .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 18px; scroll-behavior: smooth; }
     .messages::-webkit-scrollbar { width: 4px; }
-    .messages::-webkit-scrollbar-track { background: transparent; }
     .messages::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 2px; }
 
-    .msg {
-      display: flex;
-      gap: 12px;
-      animation: fadeUp 0.25s ease;
-    }
+    .msg { display: flex; gap: 12px; animation: fadeUp 0.25s ease; }
     @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-
     .msg.user { flex-direction: row-reverse; }
-
-    .avatar {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
-      margin-top: 3px;
-    }
-    .avatar.ai   { background: linear-gradient(135deg,#7c5cfc,#c084fc); box-shadow: 0 0 10px var(--glow); }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; margin-top: 3px; }
+    .avatar.ai { background: linear-gradient(135deg,#7c5cfc,#c084fc); box-shadow: 0 0 10px var(--glow); }
     .avatar.user { background: var(--surface3); border: 1px solid var(--border2); }
+    .bubble { max-width: 80%; padding: 11px 15px; border-radius: 16px; font-size: 14px; line-height: 1.65; }
+    .msg.ai .bubble { background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px 16px 16px 16px; }
+    .msg.user .bubble { background: linear-gradient(135deg,rgba(124,92,252,0.22),rgba(192,132,252,0.12)); border: 1px solid rgba(124,92,252,0.22); border-radius: 16px 4px 16px 16px; }
 
-    .bubble {
-      max-width: 80%;
-      padding: 11px 15px;
-      border-radius: 16px;
-      font-size: 14px;
-      line-height: 1.65;
-    }
-    .msg.ai   .bubble {
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 4px 16px 16px 16px;
-    }
-    .msg.user .bubble {
-      background: linear-gradient(135deg,rgba(124,92,252,0.22),rgba(192,132,252,0.12));
-      border: 1px solid rgba(124,92,252,0.22);
-      border-radius: 16px 4px 16px 16px;
-    }
-
-    .tag {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 20px;
-      margin: 0 4px 8px 0;
-      font-weight: 500;
-    }
-    .tag.web   { background: rgba(56,249,215,0.1); color: var(--cyan);   border: 1px solid rgba(56,249,215,0.2); }
-    .tag.think { background: rgba(124,92,252,0.1); color: var(--accent2); border: 1px solid rgba(124,92,252,0.2); }
-
-    /* ── Thinking animation ── */
-    .thinking-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 11px 15px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 4px 16px 16px 16px;
-      font-size: 13px;
-      color: var(--text3);
-    }
-    .dots span {
-      display: inline-block;
-      width: 5px; height: 5px;
-      background: var(--accent);
-      border-radius: 50%;
-      animation: bounce 1s infinite;
-      margin: 0 1px;
-    }
+    .thinking-wrap { display: flex; align-items: center; gap: 8px; padding: 11px 15px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px 16px 16px 16px; font-size: 13px; color: var(--text3); }
+    .dots span { display: inline-block; width: 5px; height: 5px; background: var(--accent); border-radius: 50%; animation: bounce 1s infinite; margin: 0 1px; }
     .dots span:nth-child(2) { animation-delay: 0.15s; }
-    .dots span:nth-child(3) { animation-delay: 0.30s; }
+    .dots span:nth-child(3) { animation-delay: 0.3s; }
     @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
 
-    .spin-ring {
-      width: 12px; height: 12px;
-      border: 2px solid rgba(56,249,215,0.25);
-      border-top-color: var(--cyan);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to{transform:rotate(360deg)} }
-
-    /* ── Welcome ── */
-    .welcome {
-      text-align: center;
-      padding: 10px 10px 0;
-    }
-    .welcome h2 {
-      font-size: 26px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #a78bfa, #38f9d7);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
-    }
-    .welcome p { font-size: 14px; color: var(--text3); margin-bottom: 20px; }
-    .caps { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; }
-    .cap {
-      padding: 7px 16px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      font-size: 13px;
-      color: var(--text2);
-      display: flex; align-items: center; gap: 6px;
-    }
+    .welcome { text-align: center; padding: 10px; }
+    .welcome h2 { font-size: 24px; font-weight: 800; background: linear-gradient(135deg,#a78bfa,#38f9d7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+    .welcome p { font-size: 13px; color: var(--text3); margin-bottom: 16px; }
+    .caps { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-bottom: 16px; }
+    .cap { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; color: var(--text2); }
     .suggestions { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; }
-    .sugg {
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--text2);
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: inherit;
-    }
+    .sugg { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-size: 12px; cursor: pointer; transition: all 0.15s; font-family: inherit; }
     .sugg:hover { border-color: var(--accent); color: var(--accent2); }
 
-    /* ── Source chips ── */
-    .source-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-    .source-chip {
-      display: flex; align-items: center; gap: 5px;
-      padding: 3px 9px;
-      border-radius: 6px;
-      background: var(--surface3);
-      border: 1px solid var(--border2);
-      font-size: 10px;
-      color: var(--text3);
-    }
-    .source-chip .sdot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); flex-shrink:0; }
-
-    /* ── Formatted content ── */
-    .bubble pre {
-      background: var(--surface3);
-      border: 1px solid var(--border2);
-      border-radius: 8px;
-      padding: 12px;
-      overflow-x: auto;
-      font-size: 12.5px;
-      margin: 8px 0;
-      font-family: 'Courier New', monospace;
-      color: var(--accent2);
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-    .bubble code {
-      background: var(--surface3);
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 12px;
-      color: var(--accent2);
-    }
+    .bubble pre { background: var(--surface3); border: 1px solid var(--border2); border-radius: 8px; padding: 12px; overflow-x: auto; font-size: 12px; margin: 8px 0; font-family: 'Courier New',monospace; color: var(--accent2); white-space: pre-wrap; word-break: break-all; }
+    .bubble code { background: var(--surface3); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; color: var(--accent2); }
     .bubble strong { color: var(--text); font-weight: 600; }
     .bubble .bh { font-weight: 600; font-size: 15px; margin: 10px 0 4px; color: var(--accent2); display: block; }
     .bubble .li { padding-left: 16px; position: relative; margin: 2px 0; }
     .bubble .li::before { content: '•'; position: absolute; left: 0; color: var(--accent); }
 
-    /* ── Input area ── */
-    .input-area {
-      padding: 12px 20px 16px;
-      border-top: 1px solid var(--border2);
-      background: var(--surface);
-      flex-shrink: 0;
-      position: relative;
-      z-index: 10;
-    }
-
-    .toggles { display: flex; gap: 7px; margin-bottom: 10px; flex-wrap: wrap; }
-    .toggle-chip {
-      display: flex; align-items: center; gap: 5px;
-      padding: 4px 11px;
-      border-radius: 20px;
-      border: 1px solid var(--border2);
-      background: transparent;
-      color: var(--text3);
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: inherit;
-    }
-    .toggle-chip.on-web   { border-color: rgba(56,249,215,0.4); color: var(--cyan);   background: rgba(56,249,215,0.05); }
-    .toggle-chip.on-think { border-color: rgba(124,92,252,0.4); color: var(--accent2); background: rgba(124,92,252,0.05); }
-
-    .input-row {
-      display: flex;
-      align-items: flex-end;
-      gap: 10px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 16px;
-      padding: 10px 14px;
-      transition: border-color 0.2s;
-    }
+    .input-area { padding: 12px 20px 16px; border-top: 1px solid var(--border2); background: var(--surface); flex-shrink: 0; }
+    .toggles { display: flex; gap: 7px; margin-bottom: 10px; }
+    .toggle-chip { padding: 4px 11px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--text3); font-size: 12px; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+    .toggle-chip.on { border-color: rgba(124,92,252,0.4); color: var(--accent2); background: rgba(124,92,252,0.05); }
+    .input-row { display: flex; align-items: flex-end; gap: 10px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 16px; padding: 10px 14px; transition: border-color 0.2s; }
     .input-row:focus-within { border-color: rgba(124,92,252,0.4); }
-
-    #user-input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-size: 14px;
-      font-family: inherit;
-      resize: none;
-      max-height: 120px;
-      line-height: 1.5;
-    }
+    #user-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-size: 14px; font-family: inherit; resize: none; max-height: 120px; line-height: 1.5; }
     #user-input::placeholder { color: var(--text3); }
-
-    .send-btn {
-      width: 36px; height: 36px;
-      border-radius: 11px;
-      border: none;
-      background: linear-gradient(135deg, #7c5cfc, #c084fc);
-      color: white;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
-      transition: all 0.15s;
-      box-shadow: 0 0 12px var(--glow);
-    }
-    .send-btn:hover   { transform: scale(1.06); box-shadow: 0 0 20px var(--glow); }
+    .send-btn { width: 36px; height: 36px; border-radius: 11px; border: none; background: linear-gradient(135deg,#7c5cfc,#c084fc); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; transition: all 0.15s; box-shadow: 0 0 12px var(--glow); }
+    .send-btn:hover { transform: scale(1.06); }
     .send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
-
-    .footer-note {
-      text-align: center;
-      font-size: 10px;
-      color: var(--text3);
-      margin-top: 8px;
-    }
+    .footer-note { text-align: center; font-size: 10px; color: var(--text3); margin-top: 8px; }
     .footer-note a { color: var(--accent2); text-decoration: none; }
-    .footer-note a:hover { text-decoration: underline; }
+    .sys-msg { text-align: center; font-size: 11px; color: var(--text3); padding: 2px 0; }
+    .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 2px 8px; border-radius: 20px; margin: 0 4px 8px 0; font-weight: 500; background: rgba(124,92,252,0.1); color: var(--accent2); border: 1px solid rgba(124,92,252,0.2); }
 
-    .sys-msg {
-      text-align: center;
-      font-size: 11px;
-      color: var(--text3);
-      padding: 2px 0;
-    }
-
-    /* responsive */
-    @media (max-width: 600px) {
-      .bubble { max-width: 92%; font-size: 13px; }
-      .welcome h2 { font-size: 20px; }
-      .header-title p { display: none; }
-    }
+    @media (max-width:600px) { .bubble{max-width:92%;font-size:13px} .welcome h2{font-size:20px} }
   </style>
 </head>
 <body>
-
 <div class="app">
 
-  <!-- Header -->
   <div class="header">
     <div class="logo">🧠</div>
     <div class="header-title">
       <h1>AI Brain</h1>
-      <p>Free AI · No subscription · Web-powered</p>
+      <p>Free AI · No subscription · Powered by Claude</p>
     </div>
     <div class="live-badge"><div class="live-dot"></div> Live</div>
   </div>
 
-  <!-- API Key Banner -->
   <div id="api-banner">
-    <p>🔑 Enter your Anthropic API key to activate (stored in your browser only, never sent anywhere else):</p>
-    <input type="password" id="api-key-input" placeholder="sk-ant-..." />
+    <p>🔑 Enter your Anthropic API key to start (saved in your browser only):</p>
+    <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." />
     <button onclick="saveKey()">Activate →</button>
   </div>
 
-  <!-- Toolbar -->
   <div class="toolbar">
     <button class="tool-btn active" onclick="setMode('chat',this)">💬 Chat</button>
     <button class="tool-btn" onclick="setMode('code',this)">💻 Code</button>
@@ -462,255 +115,170 @@
     <button class="tool-btn" onclick="clearChat()" style="margin-left:auto">🗑️ Clear</button>
   </div>
 
-  <!-- Messages -->
   <div class="messages" id="messages">
     <div class="msg ai">
       <div class="avatar ai">🧠</div>
-      <div>
-        <div class="bubble">
-          <div class="welcome">
-            <h2>Your AI Brain</h2>
-            <p>Ask me anything — I search the web, reason deeply, write code, do math, and more. Completely free to use.</p>
-            <div class="caps">
-              <div class="cap">🌐 Live web search</div>
-              <div class="cap">🧮 Deep reasoning</div>
-              <div class="cap">💻 Write &amp; fix code</div>
-              <div class="cap">📚 Summarise anything</div>
-              <div class="cap">🗣️ Any language</div>
-            </div>
-            <div class="suggestions">
-              <button class="sugg" onclick="ask('What are the latest AI news today?')">🌐 Latest AI news</button>
-              <button class="sugg" onclick="ask('Explain quantum computing in simple words')">⚛️ Quantum computing</button>
-              <button class="sugg" onclick="ask('Write a Python web scraper for a news site')">🐍 Python scraper</button>
-              <button class="sugg" onclick="ask('What is the best smartphone to buy right now?')">📱 Best phone now</button>
-              <button class="sugg" onclick="ask('Solve: integral of x^2 * sin(x) dx')">🔢 Solve an integral</button>
-              <button class="sugg" onclick="ask('Write a short story about an AI that dreams')">✍️ Creative story</button>
-            </div>
+      <div><div class="bubble">
+        <div class="welcome">
+          <h2>Your AI Brain</h2>
+          <p>Ask me anything — I reason deeply, write code, do math, and more. Completely free.</p>
+          <div class="caps">
+            <div class="cap">🧮 Deep reasoning</div>
+            <div class="cap">💻 Write &amp; fix code</div>
+            <div class="cap">📚 Summarise anything</div>
+            <div class="cap">🗣️ Any language</div>
+          </div>
+          <div class="suggestions">
+            <button class="sugg" onclick="ask('What is artificial intelligence and how does it work?')">🤖 What is AI?</button>
+            <button class="sugg" onclick="ask('Explain quantum computing in simple words')">⚛️ Quantum computing</button>
+            <button class="sugg" onclick="ask('Write a Python web scraper for news sites')">🐍 Python scraper</button>
+            <button class="sugg" onclick="ask('What is the best smartphone to buy right now?')">📱 Best phone</button>
+            <button class="sugg" onclick="ask('Solve step by step: integral of x^2 sin(x) dx')">🔢 Solve integral</button>
+            <button class="sugg" onclick="ask('Write a short story about an AI that dreams')">✍️ Creative story</button>
           </div>
         </div>
-      </div>
+      </div></div>
     </div>
   </div>
 
-  <!-- Input Area -->
   <div class="input-area">
     <div class="toggles">
-      <button class="toggle-chip on-web"   id="web-btn"   onclick="toggleWeb()">🌐 Web search on</button>
-      <button class="toggle-chip on-think" id="think-btn" onclick="toggleThink()">🧠 Deep thinking on</button>
+      <button class="toggle-chip on" id="think-btn" onclick="toggleThink()">🧠 Deep thinking on</button>
     </div>
     <div class="input-row">
-      <textarea id="user-input" rows="1"
-        placeholder="Ask anything… I'll search the web and think it through."
-        onkeydown="handleKey(event)"
-        oninput="autoResize(this)"></textarea>
-      <button class="send-btn" id="send-btn" onclick="sendMessage()" title="Send (Enter)">➤</button>
+      <textarea id="user-input" rows="1" placeholder="Ask anything…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
     </div>
     <p class="footer-note">
-      Get your free API key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> &nbsp;·&nbsp;
-      Your key is stored only in this browser &nbsp;·&nbsp;
-      Built with Claude AI
+      Free API key → <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+      &nbsp;·&nbsp; Key stored in your browser only, never shared
     </p>
   </div>
 
 </div>
-
 <script>
-  /* ── State ── */
-  let apiKey       = localStorage.getItem('aibrain_key') || '';
-  let webEnabled   = true;
+  let apiKey = localStorage.getItem('aibrain_key') || '';
   let thinkEnabled = true;
-  let currentMode  = 'chat';
-  let isLoading    = false;
-  let history      = [];
+  let currentMode = 'chat';
+  let isLoading = false;
+  let history = [];
 
   const modePrompts = {
-    chat:     'You are "AI Brain", a brilliant AI assistant. Be helpful, warm, and clear. Use markdown formatting (headings with #, bullet lists with -, code blocks with ```) where it improves clarity.',
-    code:     'You are "AI Brain", an expert software engineer. Write clean, well-commented code. Always explain what the code does and how to run it. Default to Python unless specified. Use code blocks.',
-    math:     'You are "AI Brain", a mathematics expert. Always show step-by-step working. Use clear notation. Double-check your final answer.',
-    write:    'You are "AI Brain", a world-class creative writer and copywriter. Write compelling, polished content that exactly matches the requested tone and purpose.',
-    research: 'You are "AI Brain", a senior research analyst. Provide thorough, evidence-based analysis. Organise information clearly with headings and bullet points. Cite data where possible.'
+    chat:     'You are "AI Brain", a brilliant AI assistant. Be helpful, warm, and clear. Format responses nicely using **bold**, # headings, - bullet points, and ```code blocks``` where helpful.',
+    code:     'You are "AI Brain", an expert software engineer. Write clean, well-commented code. Explain what it does and how to run it. Always use code blocks.',
+    math:     'You are "AI Brain", a mathematics expert. Show step-by-step working clearly. Double-check your final answer.',
+    write:    'You are "AI Brain", a world-class creative writer. Write compelling, polished content matching the requested style and tone.',
+    research: 'You are "AI Brain", a senior research analyst. Give thorough analysis with clear headings and bullet points.'
   };
 
-  /* ── Init: restore key ── */
-  (function init() {
-    if (apiKey) {
-      document.getElementById('api-key-input').value = apiKey;
-      hideBanner();
-    }
-  })();
+  if (apiKey) hideBanner();
 
   function saveKey() {
     const val = document.getElementById('api-key-input').value.trim();
-    if (!val.startsWith('sk-')) { alert('Please enter a valid Anthropic API key (starts with sk-ant-…)'); return; }
+    if (!val || val.length < 10) { alert('Please enter a valid Anthropic API key (starts with sk-ant-).'); return; }
     apiKey = val;
     localStorage.setItem('aibrain_key', apiKey);
     hideBanner();
-    addSysMsg('✅ API key saved — AI Brain activated!');
+    addSysMsg('✅ Activated! AI Brain is ready.');
   }
-
   function hideBanner() { document.getElementById('api-banner').style.display = 'none'; }
 
-  /* ── Mode ── */
   function setMode(m, btn) {
     currentMode = m;
     document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
     addSysMsg('Mode → ' + m.toUpperCase());
   }
-
-  /* ── Toggles ── */
-  function toggleWeb() {
-    webEnabled = !webEnabled;
-    const b = document.getElementById('web-btn');
-    b.className = 'toggle-chip' + (webEnabled ? ' on-web' : '');
-    b.textContent = '🌐 Web search ' + (webEnabled ? 'on' : 'off');
-  }
   function toggleThink() {
     thinkEnabled = !thinkEnabled;
     const b = document.getElementById('think-btn');
-    b.className = 'toggle-chip' + (thinkEnabled ? ' on-think' : '');
+    b.className = 'toggle-chip' + (thinkEnabled ? ' on' : '');
     b.textContent = '🧠 Deep thinking ' + (thinkEnabled ? 'on' : 'off');
   }
-
-  /* ── Helpers ── */
-  function autoResize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-  }
-  function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  }
+  function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight,120)+'px'; }
+  function handleKey(e) { if (e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); } }
   function ask(q) { document.getElementById('user-input').value = q; sendMessage(); }
-  function escHtml(t) {
-    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+  function escHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function addSysMsg(text) {
+  function addSysMsg(t) {
     const msgs = document.getElementById('messages');
-    const d = document.createElement('div');
-    d.className = 'sys-msg';
-    d.textContent = text;
-    msgs.appendChild(d);
-    msgs.scrollTop = msgs.scrollHeight;
+    const d = document.createElement('div'); d.className = 'sys-msg'; d.textContent = t;
+    msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
   }
+  function clearChat() { history = []; document.getElementById('messages').innerHTML = ''; addSysMsg('Chat cleared ✨'); }
 
-  function clearChat() {
-    history = [];
-    document.getElementById('messages').innerHTML = '';
-    addSysMsg('Chat cleared ✨');
-  }
-
-  /* ── Render user message ── */
   function addUserMsg(text) {
     const msgs = document.getElementById('messages');
-    const d = document.createElement('div');
-    d.className = 'msg user';
+    const d = document.createElement('div'); d.className = 'msg user';
     d.innerHTML = `<div class="avatar user">👤</div><div class="bubble">${escHtml(text)}</div>`;
-    msgs.appendChild(d);
-    msgs.scrollTop = msgs.scrollHeight;
+    msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
   }
 
-  /* ── Thinking indicator ── */
   function addThinking() {
     const msgs = document.getElementById('messages');
-    const d = document.createElement('div');
-    d.className = 'msg ai';
-    d.id = 'thinking';
-    const searchLine = webEnabled
-      ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:12px;color:#38f9d7"><div class="spin-ring"></div> Searching the web…</div>`
-      : '';
-    d.innerHTML = `<div class="avatar ai">🧠</div>
-      <div><div class="thinking-wrap">
-        ${searchLine}
-        <div class="dots"><span></span><span></span><span></span></div>
-        <span style="margin-left:4px">${thinkEnabled ? 'Thinking deeply…' : 'Processing…'}</span>
-      </div></div>`;
-    msgs.appendChild(d);
-    msgs.scrollTop = msgs.scrollHeight;
+    const d = document.createElement('div'); d.className = 'msg ai'; d.id = 'thinking';
+    d.innerHTML = `<div class="avatar ai">🧠</div><div><div class="thinking-wrap">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <span style="margin-left:6px">${thinkEnabled ? 'Thinking deeply…' : 'Processing…'}</span>
+    </div></div>`;
+    msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
   }
 
-  /* ── Format AI response ── */
   function formatText(raw) {
-    // code blocks
     raw = raw.replace(/```[\w]*\n?([\s\S]*?)```/g, '<pre>$1</pre>');
-    // inline code
     raw = raw.replace(/`([^`\n]+)`/g, '<code>$1</code>');
-    // bold
     raw = raw.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    // headings
     raw = raw.replace(/^#{1,3} (.+)$/gm, '<span class="bh">$1</span>');
-    // bullets
     raw = raw.replace(/^[-*] (.+)$/gm, '<div class="li">$1</div>');
-    // newlines (not inside pre)
     raw = raw.replace(/\n/g, '<br>');
     return raw;
   }
 
-  /* ── Render AI message ── */
-  function addAIMsg(text, usedWeb) {
+  function addAIMsg(text) {
     const msgs = document.getElementById('messages');
-    const d = document.createElement('div');
-    d.className = 'msg ai';
-
-    let tags = '';
-    if (usedWeb)     tags += '<span class="tag web">🌐 Web searched</span>';
-    if (thinkEnabled) tags += '<span class="tag think">🧠 Deep analysis</span>';
-
-    const sources = usedWeb ? `<div class="source-chips">
-      <div class="source-chip"><div class="sdot"></div> web results</div>
-      <div class="source-chip"><div class="sdot"></div> knowledge base</div>
-      <div class="source-chip"><div class="sdot"></div> reasoning</div>
-    </div>` : '';
-
-    d.innerHTML = `<div class="avatar ai">🧠</div>
-      <div><div class="bubble">
-        ${tags ? tags + '<br>' : ''}
-        ${formatText(text)}
-        ${sources}
-      </div></div>`;
-    msgs.appendChild(d);
-    msgs.scrollTop = msgs.scrollHeight;
+    const d = document.createElement('div'); d.className = 'msg ai';
+    const tag = thinkEnabled ? '<span class="tag">🧠 Deep analysis</span><br>' : '';
+    d.innerHTML = `<div class="avatar ai">🧠</div><div><div class="bubble">${tag}${formatText(text)}</div></div>`;
+    msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
   }
 
-  /* ── Send message ── */
   async function sendMessage() {
     if (isLoading) return;
-
     if (!apiKey) {
       document.getElementById('api-banner').style.display = 'flex';
       document.getElementById('api-key-input').focus();
-      addSysMsg('⚠️ Please enter your API key first.');
+      addSysMsg('⚠️ Enter your API key first.');
       return;
     }
 
     const input = document.getElementById('user-input');
-    const text  = input.value.trim();
+    const text = input.value.trim();
     if (!text) return;
 
     isLoading = true;
     document.getElementById('send-btn').disabled = true;
-    input.value = '';
-    input.style.height = 'auto';
+    input.value = ''; input.style.height = 'auto';
 
     addUserMsg(text);
     addThinking();
-
     history.push({ role: 'user', content: text });
 
     const systemPrompt = modePrompts[currentMode]
-      + (webEnabled   ? '\n\nYou have web search access. For current events, prices, news, or recent data, mention you are fetching live results.' : '')
-      + (thinkEnabled ? '\n\nThink step by step. Show your reasoning when it adds value. Be thorough and accurate.' : '');
+      + (thinkEnabled ? '\n\nThink step by step and show your reasoning when helpful.' : '');
 
-    const body = {
-      model: 'claude-sonnet-4-20250514',
+    const payload = {
+      model: 'claude-haiku-4-5',
       max_tokens: 1500,
       system: systemPrompt,
       messages: history.slice(-14)
     };
-    if (webEnabled) body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+
+    // Use corsproxy.io to bypass CORS on GitHub Pages
+    const PROXY = 'https://corsproxy.io/?url=';
+    const API   = 'https://api.anthropic.com/v1/messages';
 
     try {
-      const res  = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch(PROXY + encodeURIComponent(API), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -718,36 +286,36 @@
           'anthropic-version': '2023-06-01',
           'anthropic-dangerous-direct-browser-api-access-preview': 'true'
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(payload)
       });
 
-      const data = await res.json();
       document.getElementById('thinking')?.remove();
+
+      const data = await res.json();
 
       if (data.error) {
         const msg = data.error.message || 'Unknown error';
-        if (msg.includes('api_key') || msg.includes('auth')) {
+        if (res.status === 401 || msg.toLowerCase().includes('auth') || msg.toLowerCase().includes('api_key')) {
           addSysMsg('❌ Invalid API key. Please check and re-enter.');
           document.getElementById('api-banner').style.display = 'flex';
           localStorage.removeItem('aibrain_key');
           apiKey = '';
         } else {
-          addAIMsg('⚠️ Error: ' + msg, false);
+          addAIMsg('⚠️ Error from API: ' + msg);
         }
       } else {
         let responseText = '';
-        let usedWeb = false;
         for (const block of (data.content || [])) {
-          if (block.type === 'text')     responseText += block.text;
-          if (block.type === 'tool_use' && block.name === 'web_search') usedWeb = true;
+          if (block.type === 'text') responseText += block.text;
         }
-        history.push({ role: 'assistant', content: responseText || '(no response)' });
-        addAIMsg(responseText || 'No response generated.', usedWeb);
+        responseText = responseText || 'No response.';
+        history.push({ role: 'assistant', content: responseText });
+        addAIMsg(responseText);
       }
 
     } catch (err) {
       document.getElementById('thinking')?.remove();
-      addAIMsg('⚠️ Network error. Check your connection and try again.', false);
+      addAIMsg('⚠️ Connection failed. Please check your internet connection and try again.\n\nError: ' + err.message);
     }
 
     isLoading = false;
